@@ -21,6 +21,7 @@ if (!function_exists('is_logged_in')) {
 $page_title = $page_title ?? 'SKIBIDI TOLET HOMESTAY'; // Tiêu đề trang
 $extra_css  = $extra_css  ?? [];                         // Mảng CSS bổ sung
 $base_url   = defined('BASE_URL') ? BASE_URL : '/homestay/'; // Đường dẫn gốc
+
 ?>
 <!DOCTYPE html>
 <!-- lang="vi" = trang web bằng tiếng Việt (giúp trình duyệt + SEO) -->
@@ -69,21 +70,9 @@ $base_url   = defined('BASE_URL') ? BASE_URL : '/homestay/'; // Đường dẫn 
         <!-- href="#lien-he" = cuộn xuống phần footer có id="lien-he" -->
         <a href="#lien-he">Liên hệ</a>
 
-        <?php if (is_logged_in()): // Nếu đã đăng nhập → hiện tên + nút đăng xuất ?>
-            <!-- Bấm → đến trang lịch sử đặt phòng cá nhân -->
-            <a href="<?= $base_url ?>pages/user/my_bookings.php">
-                Xin chào, <?= e(current_user()['name']) // Hiện tên user ?>
-            </a>
-
-            <?php if (is_admin()): // Nếu là admin → thêm link vào trang quản trị ?>
-                <!-- class="nav-admin" → CSS highlight nút này khác biệt -->
-                <a href="<?= $base_url ?>pages/admin/dashboard.php" class="nav-admin">
-                    ⚙ Quản trị
-                </a>
-            <?php endif; // Kết thúc kiểm tra admin ?>
-
-            <!-- Bấm → chạy logout.php (hủy session + chuyển về login) -->
-            <a href="<?= $base_url ?>pages/auth/logout.php">Đăng xuất</a>
+        <?php if (is_logged_in()): // Nếu đã đăng nhập → hiện link "Xin chào, [Tên]" dẫn đến trang tài khoản ?>
+            <!-- Bấm vào → chuyển sang trang thông tin tài khoản (account.php) -->
+            <a href="<?= $base_url ?>pages/user/account.php">Xin chào, <?= e(current_user()['name']) ?></a>
 
         <?php else: // Nếu chưa đăng nhập → hiện link đăng nhập ?>
             <a href="<?= $base_url ?>pages/auth/login.php">Đăng nhập</a>

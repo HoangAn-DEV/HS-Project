@@ -31,7 +31,8 @@ homestay/
 ├── index.php                      # Trang chủ (danh sách phòng + modal đặt)
 │
 ├── sql/
-│   └── schema.sql                 # File tạo database — CHẠY ĐẦU TIÊN
+│   ├── schema.sql                 # File tạo database — CHẠY ĐẦU TIÊN
+│   └── add_cccd_columns.sql       # Migration: thêm cột CCCD vào bookings
 │
 ├── includes/                      # Components dùng chung
 │   ├── db.php                     # Kết nối MySQL (singleton pattern)
@@ -71,9 +72,13 @@ homestay/
 │       ├── users.php              # Quản lý tài khoản (phân quyền)
 │       └── settings.php           # Cài đặt hệ thống (ngân hàng, phụ thu)
 │
+├── uploads/                       # File do người dùng upload
+│   └── cccd/                      # Ảnh CCCD khách hàng
+│       └── .htaccess              # Chặn thực thi PHP (bảo mật)
+│
 └── api/                           # Xử lý logic backend
     ├── process_booking.php        # Nhận form đặt phòng → validate → lưu DB
-    ├── booking_action.php         # Admin: duyệt/hủy/xóa booking
+    ├── booking_action.php         # Admin: duyệt/hủy/xóa booking (+ xóa ảnh CCCD)
     └── room_action.php            # Admin: CRUD phòng
 ```
 

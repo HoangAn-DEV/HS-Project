@@ -3,7 +3,7 @@
  * ============================================================
  * includes/admin_header.php — Layout đầu trang admin
  * ============================================================
- * Design: Glass-morphism sidebar (thanh bên mờ kính) + Editorial content area
+ * Thiết kế: Sidebar mờ kính (Glass-morphism) + Vùng nội dung kiểu editorial
  *
  * Chức năng:
  * - Kiểm tra quyền admin (require_admin) trước khi hiển thị
@@ -33,6 +33,7 @@ $base_url    = defined('BASE_URL') ? BASE_URL : '/homestay/';
 $_pending_count = 0;
 $_pq = db()->query("SELECT COUNT(*) AS c FROM bookings WHERE trang_thai='cho_xac_nhan'");
 if ($_pq) $_pending_count = (int)$_pq->fetch_assoc()['c'];
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -127,7 +128,7 @@ if ($_pq) $_pending_count = (int)$_pq->fetch_assoc()['c'];
         </a>
     </nav>
 
-    <!-- ===== USER INFO (thông tin admin đang đăng nhập) — ở cuối sidebar ===== -->
+    <!-- ===== THÔNG TIN ADMIN ĐANG ĐĂNG NHẬP — ở cuối sidebar ===== -->
     <div class="sidebar-footer">
         <div class="sidebar-user">
             <!-- Avatar: lấy chữ cái đầu tên (mb_substr hỗ trợ tiếng Việt) -->
@@ -144,7 +145,7 @@ if ($_pq) $_pending_count = (int)$_pq->fetch_assoc()['c'];
     </div>
 </aside>
 
-<!-- ===== MAIN CONTENT AREA (vùng nội dung chính bên phải sidebar) ===== -->
+<!-- ===== VÙNG NỘI DUNG CHÍNH (bên phải sidebar) ===== -->
 <main class="admin-main">
     <!-- TOPBAR (thanh trên cùng) — hiện tiêu đề trang + đồng hồ + tên user -->
     <header class="admin-topbar">
@@ -159,7 +160,10 @@ if ($_pq) $_pending_count = (int)$_pq->fetch_assoc()['c'];
         <div class="topbar-actions">
             <!-- Đồng hồ realtime — JS trong admin.js sẽ cập nhật mỗi giây -->
             <span class="topbar-clock" id="liveClock"></span>
-            <span class="topbar-greeting">Xin chào, <strong><?= e(current_user()['name']) ?></strong></span>
+            <!-- Bấm "Xin chào, [Tên]" → chuyển sang trang thông tin tài khoản -->
+            <a href="<?= $base_url ?>pages/user/account.php" class="topbar-greeting">
+                Xin chào, <strong><?= e(current_user()['name']) ?></strong>
+            </a>
         </div>
     </header>
 

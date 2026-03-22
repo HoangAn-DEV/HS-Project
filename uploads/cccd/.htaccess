@@ -1,0 +1,3 @@
+# Chặn thực thi PHP trong thư mục uploads (bảo mật)
+# Ngăn hacker upload file .php giả dạng ảnh rồi chạy code
+php_flag engine off

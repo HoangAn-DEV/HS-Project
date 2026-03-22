@@ -389,11 +389,23 @@
     align-items: center;
     gap: 16px;
 }
-/* Lời chào "Xin chào, Admin" */
+/* -- Nút "Xin chào, Admin" trên topbar — link đến trang thông tin tài khoản -- */
 .topbar-greeting {
     font-size: 0.8rem;
     color: var(--text-secondary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
 }
+/* Hover → nền xám nhẹ */
+.topbar-greeting:hover {
+    background: rgba(0,0,0,0.04);
+}
+/* Tên admin in đậm, màu đậm hơn */
 .topbar-greeting strong {
     color: var(--text-primary);
     font-weight: 600;

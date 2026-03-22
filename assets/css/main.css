@@ -165,6 +165,156 @@ nav .nav-admin:hover {
     color: var(--white);
 }
 
+/* ============================================================
+   TRANG THÔNG TIN TÀI KHOẢN (account.php)
+   ============================================================ */
+
+/* Bọc ngoài toàn trang — nền cát nhạt, padding trên dưới */
+.account-page {
+    padding: 60px 20px;
+    min-height: 60vh;
+    background: var(--sand);
+}
+/* Container chính — thẻ trắng bo góc, giới hạn chiều rộng */
+.account-container {
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* -- Phần đầu: avatar + tên + vai trò -- */
+/* Nền gradient vàng ấm (warm color) */
+.account-header {
+    padding: 32px 24px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--warm) 0%, var(--warm-dk) 100%);
+    color: var(--white);
+}
+/* Avatar tròn — hiện chữ cái đầu tên, nền mờ kính */
+.account-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 auto 12px;
+    backdrop-filter: blur(4px);
+}
+/* Họ tên — font tiêu đề Playfair Display */
+.account-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+/* Vai trò (VD: "Khách hàng" / "Quản trị viên") */
+.account-role {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    display: inline-block;
+    padding: 2px 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    margin-top: 4px;
+}
+
+/* -- Phần thân: các dòng thông tin chi tiết -- */
+.account-body {
+    padding: 24px;
+}
+/* Mỗi dòng: label (icon + tên) + giá trị */
+.account-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+}
+/* Đường kẻ ngăn cách giữa các dòng */
+.account-row + .account-row {
+    border-top: 1px solid var(--sand-dk);
+}
+/* Label: icon + text nằm ngang */
+.account-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #888);
+    font-weight: 500;
+}
+/* Icon màu vàng ấm */
+.account-label svg {
+    color: var(--warm);
+    flex-shrink: 0;
+}
+/* Giá trị (email, SĐT, v.v.) — căn phải */
+.account-value {
+    font-size: 0.9rem;
+    color: var(--charcoal);
+    font-weight: 500;
+    text-align: right;
+}
+
+/* -- Phần cuối: các nút hành động -- */
+.account-actions {
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+/* Nút chung — bo góc, căn giữa, icon + text */
+.account-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--charcoal);
+    background: var(--white);
+    transition: all 0.15s ease;
+}
+.account-btn:hover {
+    background: var(--sand);
+    border-color: var(--warm);
+}
+/* Nút đăng xuất — viền đỏ, chữ đỏ */
+.account-btn-logout {
+    color: #e74c3c;
+    border-color: rgba(231,76,60,0.2);
+}
+.account-btn-logout:hover {
+    background: rgba(231,76,60,0.06);
+    border-color: #e74c3c;
+}
+
+/* Responsive — mobile */
+@media (max-width: 768px) {
+    .account-page {
+        padding: 30px 12px;
+    }
+    .account-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .account-value {
+        text-align: left;
+        padding-left: 28px;         /* Thụt vào để thẳng hàng với text label */
+    }
+}
+
 /* Nút hamburger (chỉ hiển thị trên mobile) */
 .menu-toggle {
     display: none;

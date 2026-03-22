@@ -32,6 +32,29 @@ if ($id <= 0 || !in_array($action, ['approve', 'cancel', 'delete'])) {
 
 $conn = db(); // Lấy kết nối database
 
+/**
+ * Xóa file ảnh CCCD trên ổ đĩa (nếu có) của 1 booking
+ * @param mysqli $conn — Kết nối DB
+ * @param int    $booking_id — ID đơn cần xóa ảnh
+ */
+function deleteCCCDFiles($conn, $booking_id) {
+    $stmt = $conn->prepare("SELECT cccd_truoc, cccd_sau FROM bookings WHERE id=? LIMIT 1");
+    $stmt->bind_param('i', $booking_id);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$row) return;
+
+    // __DIR__ = thư mục api/ → lùi 1 cấp về gốc project
+    $base = __DIR__ . '/../';
+    foreach (['cccd_truoc', 'cccd_sau'] as $col) {
+        if (!empty($row[$col]) && file_exists($base . $row[$col])) {
+            unlink($base . $row[$col]); // Xóa file vật lý
+        }
+    }
+}
+
 // switch = kiểm tra giá trị $action rồi chạy code tương ứng
 switch ($action) {
 
@@ -45,9 +68,15 @@ switch ($action) {
         $_SESSION['success'] = "Đã duyệt đơn #$id thành công.";
         break; // Thoát khỏi switch
 
+
+
+
     // ---- HỦY ĐƠN (cancel) ----
     // Đổi trạng thái thành 'da_huy' + XÓA slot để người khác đặt được
     case 'cancel':
+        // Xóa file ảnh CCCD trước khi thay đổi DB
+        deleteCCCDFiles($conn, $id);
+
         // Dùng transaction vì có 2 thao tác DB liên quan nhau
         $conn->begin_transaction();
         try {
@@ -71,11 +100,14 @@ switch ($action) {
             $_SESSION['error'] = 'Lỗi khi hủy đơn: ' . $e->getMessage();
         }
         break;
-
+        
     // ---- XÓA ĐƠN (delete) ----
     // Xóa hoàn toàn khỏi database (không khôi phục được)
     // booking_slots cũng tự xóa theo nhờ ON DELETE CASCADE trong schema
     case 'delete':
+        // Xóa file ảnh CCCD trước khi xóa record trong DB
+        deleteCCCDFiles($conn, $id);
+
         $stmt = $conn->prepare("DELETE FROM bookings WHERE id=?");
         $stmt->bind_param('i', $id);
         $stmt->execute();

@@ -4,12 +4,12 @@
  * api/room_action.php — Admin thêm / sửa / xóa phòng
  * ============================================================
  * Nhận dữ liệu từ form trong pages/admin/rooms.php
- * 
+ *
  * 3 ACTION:
  *   POST ?action=create  → Thêm phòng mới
  *   POST ?action=update  → Cập nhật phòng (cần id trong POST)
  *   GET  ?action=delete&id=X → Xóa phòng
- * 
+ *
  * Sau xử lý → redirect về pages/admin/rooms.php
  */
 
@@ -84,7 +84,7 @@ switch ($action) {
         // isset() = checkbox có được tick không (tick → gửi value, không tick → không gửi)
         $active = isset($_POST['is_active']) ? 1 : 0; // 1 = hiện, 0 = ẩn
 
-        // UPDATE = cập nhật hàng có id khớp
+        // UPDATE phòng trong DB
         $stmt = $conn->prepare(
             "UPDATE rooms SET slug=?, prefix=?, name=?, description=?,
              price_morning=?, price_afternoon=?, price_overnight=?,

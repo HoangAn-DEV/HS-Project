@@ -59,6 +59,7 @@ include __DIR__ . '/../../includes/admin_header.php';
 
     <!-- method="POST" = gửi dữ liệu ẩn (không hiện trên URL) -->
     <!-- action = URL xử lý form, kèm ?action=update hoặc ?action=create -->
+    <!-- action = URL xử lý form, kèm ?action=update hoặc ?action=create -->
     <form method="POST" action="<?= BASE_URL ?>api/room_action.php?action=<?= $editing ? 'update' : 'create' ?>">
         <!-- Hidden input: nếu đang sửa, gửi kèm ID phòng để server biết sửa phòng nào -->
         <!-- type="hidden" = ẩn, user không thấy nhưng form vẫn gửi giá trị -->
@@ -143,9 +144,9 @@ include __DIR__ . '/../../includes/admin_header.php';
         </div>
         <div class="form-row full">
             <div class="form-group">
-                <label>Đường dẫn ảnh</label>
-                <!-- URL ảnh phòng, có thể là đường dẫn local hoặc link ngoài -->
-                <input type="text" name="image_url" value="<?= e($editing['image_url'] ?? '') ?>" placeholder="assets/img/room-xxx.jpg">
+                <label>Ảnh phòng (URL)</label>
+                <!-- Đường dẫn ảnh phòng, VD: uploads/rooms/xine.jpg hoặc URL bên ngoài -->
+                <input type="text" name="image_url" value="<?= e($editing['image_url'] ?? '') ?>" placeholder="VD: uploads/rooms/xine.jpg">
             </div>
         </div>
 

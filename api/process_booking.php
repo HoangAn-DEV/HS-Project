@@ -13,6 +13,7 @@
  * - ho_ten, so_dt, email, so_khach (user nhập)
  * - ca_sang[], ca_chieu[], ca_dem[] (checkbox đã tick)
  * - xac_nhan_tuoi (checkbox xác nhận)
+ * - cccd_truoc, cccd_sau (file ảnh CCCD — qua $_FILES)
  */
 
 // Nạp auth.php → DB, session, hàm tiện ích, BASE_URL
@@ -23,6 +24,58 @@ require_once __DIR__ . '/../includes/auth.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . BASE_URL); // Về trang chủ
     exit;
+}
+
+// ---- THƯ MỤC LƯU ẢNH CCCD ----
+$cccd_upload_dir = __DIR__ . '/../uploads/cccd/';
+
+/**
+ * Upload ảnh CCCD (mặt trước hoặc mặt sau)
+ * - Kiểm tra loại file (chỉ ảnh), dung lượng (tối đa 5MB)
+ * - Đặt tên file: cccd-{booking_id}-{truoc|sau}.{ext}
+ *
+ * @param string $field_name — Tên input file ('cccd_truoc' hoặc 'cccd_sau')
+ * @param int    $booking_id — ID đơn đặt phòng (dùng đặt tên file)
+ * @param string $side       — 'truoc' hoặc 'sau'
+ * @param string $upload_dir — Đường dẫn thư mục lưu file
+ * @return string|null — Đường dẫn tương đối hoặc null nếu không có file
+ */
+function handleCCCDUpload($field_name, $booking_id, $side, $upload_dir) {
+    // Không có file upload → bỏ qua (CCCD không bắt buộc)
+    if (!isset($_FILES[$field_name]) || $_FILES[$field_name]['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $file = $_FILES[$field_name];
+
+    // Kiểm tra loại file — chỉ chấp nhận ảnh
+    // mime_content_type() đọc header file thật (không dựa vào extension giả)
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $file_type = mime_content_type($file['tmp_name']);
+    if (!in_array($file_type, $allowed_types)) {
+        return null; // File không phải ảnh → bỏ qua
+    }
+
+    // Giới hạn dung lượng: 5MB
+    if ($file['size'] > 5 * 1024 * 1024) {
+        return null; // Quá lớn → bỏ qua
+    }
+
+    // Lấy extension từ MIME type
+    $ext_map = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+    $ext = $ext_map[$file_type] ?? 'jpg';
+
+    // Đặt tên file: cccd-15-truoc.jpg, cccd-15-sau.png
+    $filename = 'cccd-' . $booking_id . '-' . $side . '.' . $ext;
+    $dest = $upload_dir . $filename;
+
+    // Di chuyển file từ thư mục tạm sang đích
+    if (!move_uploaded_file($file['tmp_name'], $dest)) {
+        return null; // Lỗi lưu file → bỏ qua
+    }
+
+    // Trả về đường dẫn tương đối (lưu vào DB)
+    return 'uploads/cccd/' . $filename;
 }
 
 // ---- CẤU HÌNH PHỤ THU ----
@@ -134,6 +187,21 @@ try { // try-catch: nếu có lỗi trong try → nhảy vào catch
     $stmt->execute();
     $booking_id = (int)$conn->insert_id; // Lấy ID vừa tạo (auto increment)
     $stmt->close();
+
+    // BƯỚC 1.5: Upload ảnh CCCD (nếu có) → lưu đường dẫn vào DB
+    // Cần booking_id để đặt tên file nên phải upload SAU khi insert
+    $cccd_truoc_path = handleCCCDUpload('cccd_truoc', $booking_id, 'truoc', $cccd_upload_dir);
+    $cccd_sau_path   = handleCCCDUpload('cccd_sau',   $booking_id, 'sau',   $cccd_upload_dir);
+
+    // Nếu có ít nhất 1 ảnh CCCD → cập nhật vào booking vừa tạo
+    if ($cccd_truoc_path || $cccd_sau_path) {
+        $stmt_cccd = $conn->prepare(
+            "UPDATE bookings SET cccd_truoc=?, cccd_sau=? WHERE id=?"
+        );
+        $stmt_cccd->bind_param('ssi', $cccd_truoc_path, $cccd_sau_path, $booking_id);
+        $stmt_cccd->execute();
+        $stmt_cccd->close();
+    }
 
     // BƯỚC 2: Kiểm tra trùng lịch (slot đã có người đặt chưa)
     $stmt_check = $conn->prepare(

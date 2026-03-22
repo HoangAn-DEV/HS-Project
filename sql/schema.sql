@@ -81,6 +81,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     tong_cuoi   INT          NOT NULL DEFAULT 0,
     trang_thai  ENUM('cho_xac_nhan','da_thanh_toan','da_huy')
                 NOT NULL DEFAULT 'cho_xac_nhan',
+    cccd_truoc  VARCHAR(255) DEFAULT NULL,       -- Đường dẫn ảnh CCCD mặt trước
+    cccd_sau    VARCHAR(255) DEFAULT NULL,       -- Đường dẫn ảnh CCCD mặt sau
     ghi_chu     TEXT         DEFAULT NULL,       -- Admin ghi chú thêm
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
