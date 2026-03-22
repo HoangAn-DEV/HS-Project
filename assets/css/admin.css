@@ -1,0 +1,1049 @@
+/* ============================================================
+   admin.css — SKIBIDI TOLET Admin Panel
+   Design: Glass-morphism + Warm Earth Tones + Editorial Layout
+   Font: DM Sans + Instrument Serif
+   ============================================================ */
+
+/* === BIẾN CSS TOÀN CỤC ===
+   Định nghĩa màu sắc, kích thước, hiệu ứng dùng chung
+   toàn bộ giao diện admin. Đổi ở đây = đổi toàn bộ.
+   ============================================================ */
+:root {
+    /* -- Sidebar -- */
+    --sb-w: 272px;                                     /* Chiều rộng sidebar */
+    --sb-bg: #0f0f0f;                                  /* Màu nền sidebar (đen) */
+    --sb-hover: rgba(255,255,255,0.06);                /* Màu nền khi hover menu */
+    --sb-active: #c8a96e;                              /* Màu vàng gold — mục đang chọn */
+    --sb-active-glow: rgba(200,169,110,0.15);          /* Ánh sáng nhẹ quanh mục đang chọn */
+    --sb-border: rgba(255,255,255,0.06);               /* Viền phân cách trong sidebar */
+    --sb-text: rgba(255,255,255,0.45);                 /* Màu chữ phụ trong sidebar */
+
+    /* -- Thanh trên cùng (topbar) -- */
+    --top-h: 68px;                                     /* Chiều cao topbar */
+
+    /* -- Nền & Card -- */
+    --content-bg: #f7f5f2;                             /* Nền vùng nội dung chính (be nhạt) */
+    --card-bg: #ffffff;                                /* Nền card trắng */
+    --card-border: rgba(0,0,0,0.06);                   /* Viền card mờ nhẹ */
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);  /* Đổ bóng card */
+    --card-shadow-hover: 0 4px 24px rgba(0,0,0,0.08); /* Đổ bóng card khi hover */
+    --card-radius: 16px;                               /* Bo góc card */
+
+    /* -- Màu chữ -- */
+    --text-primary: #1a1a1a;                           /* Chữ chính (đen đậm) */
+    --text-secondary: #6b7280;                         /* Chữ phụ (xám) */
+    --text-muted: #9ca3af;                             /* Chữ mờ (xám nhạt) */
+
+    /* -- Màu nhấn chủ đạo (vàng gold) -- */
+    --accent: #c8a96e;
+    --accent-soft: rgba(200,169,110,0.12);             /* Nền nhạt cho icon/badge gold */
+    --accent-text: #8b6914;                            /* Chữ gold đậm */
+
+    /* -- Bảng màu trạng thái -- */
+    --green: #16a34a;                                  /* Xanh lá — đã thanh toán / thành công */
+    --green-bg: #dcfce7;
+    --green-border: #bbf7d0;
+    --orange: #d97706;                                 /* Cam — chờ duyệt / cảnh báo */
+    --orange-bg: #fef3c7;
+    --orange-border: #fde68a;
+    --red: #dc2626;                                    /* Đỏ — đã hủy / lỗi / xóa */
+    --red-bg: #fee2e2;
+    --red-border: #fecaca;
+    --blue: #2563eb;                                   /* Xanh dương — thông tin / liên kết */
+    --blue-bg: #dbeafe;
+    --blue-border: #bfdbfe;
+
+    /* -- Hiệu ứng chuyển động -- */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);    /* Nhanh (hover, click) */
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);   /* Mượt (mở/đóng sidebar) */
+}
+
+/* === RESET & NỀN TẢNG ===
+   Xóa margin/padding mặc định, đặt box-sizing và font chung
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.admin-body {
+    display: flex;
+    min-height: 100vh;
+    background: var(--content-bg);
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === THANH CUỘN TÙY CHỈNH ===
+   Thanh cuộn nhỏ gọn, mờ nhẹ cho toàn trang
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* === LỚP PHỦ MỜ (mobile) ===
+   Nền tối bán trong suốt khi mở sidebar trên điện thoại.
+   Click vào overlay sẽ đóng sidebar.
+   ============================================================ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 299;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+}
+.sidebar-overlay.show { display: block; opacity: 1; }
+
+/* ============================================================
+   SIDEBAR — Thanh điều hướng bên trái
+   Cố định, nền đen, chứa logo + menu + thông tin user
+   ============================================================ */
+.admin-sidebar {
+    width: var(--sb-w);
+    min-width: var(--sb-w);
+    background: var(--sb-bg);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-smooth);
+    overflow: hidden;
+}
+/* Viền gradient mờ bên phải sidebar */
+.admin-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(200,169,110,0.2) 0%, rgba(255,255,255,0.04) 50%, rgba(200,169,110,0.1) 100%);
+}
+
+/* -- Logo & tên thương hiệu ở đầu sidebar -- */
+.sidebar-header {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--sb-border);
+}
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+/* Icon logo hình vuông bo góc */
+.brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--sb-active) 0%, #a88a4e 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(200,169,110,0.3);
+    letter-spacing: -0.5px;
+}
+/* Tên thương hiệu */
+.brand-text strong {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: 0.5px;
+}
+/* Dòng phụ đề dưới tên (VD: "ADMIN PANEL") */
+.brand-text small {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--sb-text);
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+/* -- Danh sách menu điều hướng -- */
+.sidebar-nav {
+    padding: 20px 14px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+/* Tiêu đề nhóm menu (VD: "QUẢN LÝ", "HỆ THỐNG") */
+.nav-section {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.22);
+    padding: 20px 12px 8px;
+}
+.nav-section:first-child { padding-top: 0; }
+
+/* Từng mục menu trong sidebar */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    margin-bottom: 2px;
+}
+.nav-item:hover {
+    background: var(--sb-hover);
+    color: rgba(255,255,255,0.9);
+}
+/* Mục đang được chọn (trang hiện tại) */
+.nav-item.active {
+    background: var(--sb-active-glow);
+    color: var(--sb-active);
+}
+/* Thanh dọc vàng bên trái mục đang chọn */
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--sb-active);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Icon trong mục menu */
+.nav-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
+/* Huy hiệu số (VD: số đơn chờ duyệt) */
+.nav-badge {
+    margin-left: auto;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+/* Hiệu ứng nhấp nháy nhẹ cho badge */
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* -- Chân sidebar: avatar + tên user + nút đăng xuất -- */
+.sidebar-footer {
+    padding: 18px 20px;
+    border-top: 1px solid var(--sb-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+/* Avatar hình vuông bo góc, hiển thị chữ cái đầu */
+.user-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--sb-active) 0%, #a88a4e 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+.user-info { min-width: 0; }
+/* Tên user — cắt bớt nếu quá dài */
+.user-info strong {
+    display: block;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.825rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Vai trò user (VD: "ADMIN") */
+.user-info small {
+    font-size: 0.65rem;
+    color: var(--sb-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+/* Nút đăng xuất */
+.sidebar-logout {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.35);
+    font-size: 14px;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+.sidebar-logout:hover {
+    background: rgba(239,68,68,0.12);
+    color: #ef4444;
+}
+
+/* ============================================================
+   VÙNG NỘI DUNG CHÍNH — Bên phải sidebar
+   Chứa topbar + nội dung trang
+   ============================================================ */
+.admin-main {
+    flex: 1;
+    margin-left: var(--sb-w);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* -- Thanh trên cùng (topbar) ===
+   Cố định khi cuộn, nền kính mờ, chứa tiêu đề trang + đồng hồ
+   ============================================================ */
+.admin-topbar {
+    height: var(--top-h);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+/* Nút hamburger — chỉ hiện trên mobile để mở sidebar */
+.topbar-menu {
+    display: none;
+    background: none;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    width: 42px; height: 42px;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    align-items: center;
+    justify-content: center;
+}
+.topbar-menu:hover { background: rgba(0,0,0,0.04); }
+/* Tiêu đề trang hiện tại (VD: "Dashboard", "Quản lý phòng") */
+.topbar-title { flex: 1; }
+.topbar-title h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+/* Các nút hành động bên phải topbar */
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+/* Lời chào "Xin chào, Admin" */
+.topbar-greeting {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.topbar-greeting strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Đồng hồ thời gian thực */
+.topbar-clock {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    padding: 6px 14px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* -- Vùng nội dung trang -- */
+.admin-content {
+    flex: 1;
+    padding: 32px;
+    animation: fadeInUp 0.4s ease-out;
+}
+/* Hiệu ứng xuất hiện: trượt lên + mờ dần */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   THÔNG BÁO (Alert)
+   Hiển thị thông báo thành công / lỗi sau khi thực hiện hành động
+   ============================================================ */
+.alert {
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease-out;
+}
+/* Hiệu ứng trượt xuống khi alert xuất hiện */
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Alert lỗi — nền đỏ nhạt */
+.alert-error {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+}
+/* Alert thành công — nền xanh nhạt */
+.alert-success {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+}
+
+/* ============================================================
+   THẺ THỐNG KÊ (Stat Cards)
+   Các ô hiển thị số liệu trên Dashboard:
+   tổng đơn, chờ duyệt, doanh thu, số phòng, thành viên
+   ============================================================ */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+}
+.stat-card {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+/* Đường kẻ vàng gradient ở đáy card — chỉ hiện khi hover */
+.stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20px; right: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--sb-active), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+}
+.stat-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+}
+.stat-card:hover::after { opacity: 1; }
+
+/* Icon trong thẻ thống kê */
+.stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+    background: var(--accent-soft);
+}
+.stat-icon.green-icon { background: var(--green-bg); }
+.stat-icon.orange-icon { background: var(--orange-bg); }
+.stat-icon.blue-icon { background: var(--blue-bg); }
+
+/* Nhãn phía trên số (VD: "TỔNG ĐƠN", "DOANH THU") */
+.stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+/* Số liệu lớn chính (VD: "142", "12.500.000đ") */
+.stat-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    line-height: 1;
+}
+.stat-value.accent { color: var(--sb-active); }
+.stat-value.green { color: var(--green); }
+.stat-value.orange { color: var(--orange); }
+
+/* Dòng phụ bên dưới số (VD: "đơn", "phòng hoạt động") */
+.stat-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   BẢNG DỮ LIỆU (Table)
+   Hiển thị danh sách đơn đặt, phòng, user dạng bảng
+   ============================================================ */
+.admin-table-wrap {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+/* Header bảng: tiêu đề + nút thêm mới */
+.admin-table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.admin-table-header h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text-primary);
+}
+/* Cho phép cuộn ngang trên màn hình nhỏ */
+.table-scroll { overflow-x: auto; }
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    min-width: 640px;
+}
+/* Tiêu đề cột — chữ in hoa, xám nhạt */
+.admin-table th {
+    background: #fafaf8;
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    white-space: nowrap;
+}
+/* Ô dữ liệu */
+.admin-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    color: var(--text-secondary);
+    vertical-align: middle;
+    transition: background var(--transition-fast);
+}
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr {
+    transition: background var(--transition-fast);
+}
+/* Highlight nhẹ khi hover dòng */
+.admin-table tbody tr:hover td {
+    background: rgba(200,169,110,0.04);
+}
+/* Kiểu chữ đặc biệt cho ô quan trọng */
+.td-bold { font-weight: 700; color: var(--text-primary); }      /* Chữ đậm đen */
+.td-accent { font-weight: 700; color: var(--sb-active); }       /* Chữ đậm vàng gold */
+.td-muted { color: var(--text-muted); font-size: 0.8rem; }      /* Chữ xám nhạt nhỏ */
+
+/* ============================================================
+   NHÃN TRẠNG THÁI (Badge)
+   Hiển thị trạng thái đơn: chờ duyệt / đã thanh toán / đã hủy
+   ============================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+/* Chờ duyệt — cam */
+.badge-pending {
+    background: var(--orange-bg);
+    color: #92400e;
+    border: 1px solid var(--orange-border);
+}
+/* Đã thanh toán — xanh lá */
+.badge-paid {
+    background: var(--green-bg);
+    color: #065f46;
+    border: 1px solid var(--green-border);
+}
+/* Đã hủy — đỏ */
+.badge-canceled {
+    background: var(--red-bg);
+    color: #991b1b;
+    border: 1px solid var(--red-border);
+}
+
+/* ============================================================
+   NÚT HÀNH ĐỘNG (Action Buttons)
+   Duyệt, hủy, xóa, sửa — dùng trong bảng và form
+   ============================================================ */
+.act-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.act-btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    font-family: 'Outfit', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.4;
+}
+.act-btn:hover {
+    background: #f4f5f7;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+/* Biến thể màu cho từng loại hành động */
+.act-btn.green { color: var(--green); border-color: var(--green-border); }     /* Duyệt */
+.act-btn.green:hover { background: var(--green-bg); }
+.act-btn.orange { color: var(--orange); border-color: var(--orange-border); }  /* Chờ / Cảnh báo */
+.act-btn.orange:hover { background: var(--orange-bg); }
+.act-btn.red { color: var(--red); border-color: var(--red-border); }           /* Xóa / Hủy */
+.act-btn.red:hover { background: var(--red-bg); }
+.act-btn.blue { color: var(--blue); border-color: var(--blue-border); }        /* Xem / Sửa */
+.act-btn.blue:hover { background: var(--blue-bg); }
+/* Nút chính (nổi bật nhất) — gradient vàng gold */
+.act-btn.primary {
+    background: linear-gradient(135deg, var(--sb-active), #a88a4e);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(200,169,110,0.3);
+}
+.act-btn.primary:hover {
+    box-shadow: 0 4px 16px rgba(200,169,110,0.4);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   THANH LỌC (Filter Bar)
+   Các nút lọc theo trạng thái: Tất cả / Chờ duyệt / Đã TT / Đã hủy
+   ============================================================ */
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    padding: 4px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    width: fit-content;
+}
+.filter-btn {
+    padding: 9px 20px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    font-family: 'Outfit', sans-serif;
+}
+.filter-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+/* Trạng thái đang chọn */
+.filter-btn.active { background: var(--text-primary); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.filter-btn.active-warn { background: var(--orange); color: #fff; box-shadow: 0 2px 8px rgba(217,119,6,0.3); }
+.filter-btn.active-ok { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(22,163,74,0.3); }
+.filter-btn.active-err { background: var(--red); color: #fff; box-shadow: 0 2px 8px rgba(220,38,38,0.3); }
+
+/* ============================================================
+   FORM ADMIN
+   Dùng cho: thêm/sửa phòng, cài đặt hệ thống, quản lý user
+   ============================================================ */
+.admin-form {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: 32px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    max-width: 760px;
+}
+/* Tiêu đề form */
+.admin-form h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    letter-spacing: -0.3px;
+}
+/* Hàng chứa 2 trường input ngang nhau */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+.form-row.full { grid-template-columns: 1fr; }  /* 1 trường chiếm hết chiều ngang */
+
+/* Nhóm label + input */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.2px;
+}
+/* Ô nhập liệu chung */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group textarea,
+.form-group select {
+    padding: 11px 16px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-primary);
+    background: #fafaf8;
+    transition: all var(--transition-fast);
+    outline: none;
+}
+/* Hiệu ứng khi focus: viền vàng + ánh sáng nhẹ */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: var(--sb-active);
+    background: #fff;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.form-group textarea { resize: vertical; min-height: 72px; }
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Checkbox tùy chỉnh */
+.checkbox-group {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+.checkbox-group input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--sb-active);
+    cursor: pointer;
+}
+.checkbox-group label {
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+/* ============================================================
+   TRẠNG THÁI TRỐNG (Empty State)
+   Hiển thị khi bảng/danh sách không có dữ liệu
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--text-muted);
+}
+.empty-state .empty-icon {
+    font-size: 52px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+    filter: grayscale(0.3);
+}
+.empty-state h3 {
+    color: var(--text-secondary);
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: 6px;
+}
+.empty-state p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   MODAL / HỘP THOẠI XÁC NHẬN
+   Popup xác nhận khi xóa, hủy — có nền mờ phía sau
+   ============================================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.modal-overlay.show { display: flex; }
+/* Hộp nội dung modal */
+.modal-box {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    animation: modalIn 0.25s ease-out;
+}
+/* Hiệu ứng phóng to + mờ dần khi modal xuất hiện */
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+}
+.modal-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+/* Nhóm nút trong modal (Hủy / Xác nhận) */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ============================================================
+   BANNER CHÀO MỪNG (Dashboard)
+   Dải banner đen ở đầu Dashboard, hiển thị lời chào + ngày tháng
+   ============================================================ */
+.welcome-banner {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2a24 50%, #3d3428 100%);
+    border-radius: var(--card-radius);
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+}
+/* Hiệu ứng ánh sáng tròn góc trên phải */
+.welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(200,169,110,0.15) 0%, transparent 60%);
+    border-radius: 50%;
+}
+.welcome-banner h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.65rem;
+    font-weight: 400;
+    margin-bottom: 6px;
+    position: relative;
+}
+.welcome-banner p {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.6);
+    position: relative;
+}
+/* Khối ngày tháng bên phải banner */
+.welcome-banner .welcome-date {
+    position: absolute;
+    top: 32px; right: 36px;
+    text-align: right;
+}
+/* Số ngày lớn (VD: "22") */
+.welcome-date .date-day {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--sb-active);
+    line-height: 1;
+}
+/* Tháng + thứ bên dưới */
+.welcome-date .date-info {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+}
+
+/* ============================================================
+   CÀI ĐẶT — Tiêu đề nhóm (Settings Section)
+   Phân chia form cài đặt thành các nhóm: Ngân hàng, Liên hệ, Phụ thu...
+   ============================================================ */
+.settings-section {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin: 28px 0 14px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+.settings-section:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+/* ============================================================
+   HÀNH ĐỘNG NHANH (Quick Actions)
+   Các nút tắt trên Dashboard: Duyệt đơn, Thêm phòng, Cài đặt
+   ============================================================ */
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    box-shadow: var(--card-shadow);
+}
+.quick-action-btn:hover {
+    border-color: var(--sb-active);
+    color: var(--accent-text);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-1px);
+}
+/* Icon trong nút hành động nhanh */
+.quick-action-btn .qa-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+.qa-icon.amber { background: var(--orange-bg); }
+.qa-icon.emerald { background: var(--green-bg); }
+.qa-icon.sky { background: var(--blue-bg); }
+
+/* ============================================================
+   RESPONSIVE — Thích ứng màn hình
+   Điều chỉnh layout cho tablet và điện thoại
+   ============================================================ */
+
+/* -- Tablet (≤ 1024px): thu nhỏ lưới thống kê -- */
+@media (max-width: 1024px) {
+    .stat-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+/* -- Tablet nhỏ / Điện thoại ngang (≤ 768px) -- */
+@media (max-width: 768px) {
+    .admin-sidebar { transform: translateX(-100%); }       /* Ẩn sidebar mặc định */
+    .admin-sidebar.open { transform: translateX(0); }      /* Hiện khi nhấn hamburger */
+    .admin-main { margin-left: 0; }                        /* Nội dung chiếm hết chiều ngang */
+    .topbar-menu { display: flex; align-items: center; justify-content: center; } /* Hiện nút hamburger */
+    .admin-content { padding: 20px 16px; }
+    .admin-topbar { padding: 0 16px; }
+    .form-row { grid-template-columns: 1fr; }              /* Form 1 cột */
+    .stat-grid { grid-template-columns: 1fr 1fr; gap: 12px; } /* Thống kê 2 cột */
+    .topbar-greeting { display: none; }                     /* Ẩn lời chào */
+    .topbar-clock { display: none; }                        /* Ẩn đồng hồ */
+    .welcome-banner { padding: 24px; }
+    .welcome-banner .welcome-date { display: none; }        /* Ẩn khối ngày */
+    .filter-bar { width: 100%; }
+    .filter-btn { flex: 1; text-align: center; min-width: 0; }
+}
+
+/* -- Điện thoại dọc (≤ 480px) -- */
+@media (max-width: 480px) {
+    .stat-grid { grid-template-columns: 1fr; }             /* Thống kê 1 cột */
+    .admin-topbar { padding: 0 12px; }
+    .topbar-title h1 { font-size: 1.2rem; }
+    .admin-content { padding: 16px 12px; }
+    .admin-form { padding: 24px 18px; }
+    .quick-actions { flex-direction: column; }              /* Nút xếp dọc */
+}
